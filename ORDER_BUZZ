@@ -1,0 +1,343 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX 100
+#define ORDER_SIZE 50
+
+// Prices in INR
+#define COFFEE_PRICE 50
+#define LATTE_PRICE 60
+#define CAPPUCCINO_PRICE 70
+#define SANDWICH_PRICE 40
+#define BURGER_PRICE 60
+#define FRIES_PRICE 30
+
+typedef struct {
+    char orders[MAX][ORDER_SIZE];
+    int top;
+} Stack;
+
+void initStack(Stack *s) {
+    s->top = -1;
+}
+
+int isEmpty(Stack *s) {
+    return s->top == -1;
+}
+
+int isFull(Stack *s) {
+    return s->top == MAX - 1;
+}
+
+void push(Stack *s, char *order) {
+    if (!isFull(s)) {
+        s->top++;
+        strcpy(s->orders[s->top], order);
+        printf("Order added: %s\n", order);
+    } else {
+        printf("Stack is full. Cannot take more orders.\n");
+    }
+}
+
+void displayOrders(Stack *s) {
+    if (isEmpty(s)) {
+        printf("No orders.\n");
+    } else {
+        printf("Current Orders:\n");
+        for (int i = 0; i <= s->top; i++) {
+            printf("%d. %s\n", i + 1, s->orders[i]);
+        }
+    }
+}
+
+void clearOrders(Stack *s) {
+    initStack(s);
+    printf("All orders cleared.\n");
+}
+
+void displayMenu() {
+    printf("\n=== Coffee & Cafeteria Order System ===\n");
+    printf("1. Online Order\n");
+    printf("2. Offline Order\n");
+    printf("3. Display Orders\n");
+    printf("4. Clear All Orders\n");
+    printf("5. Exit\n");
+    printf("=======================================\n");
+}
+
+void displayCoffeeMenu() {
+    printf("\n--- Coffee Menu ---\n");
+    printf("1. Coffee (₹%d)\n", COFFEE_PRICE);
+    printf("2. Latte (₹%d)\n", LATTE_PRICE);
+    printf("3. Cappuccino (₹%d)\n", CAPPUCCINO_PRICE);
+}
+
+void displayCafeteriaMenu() {
+    printf("\n--- Cafeteria Menu ---\n");
+    printf("4. Sandwich (₹%d)\n", SANDWICH_PRICE);
+    printf("5. Burger (₹%d)\n", BURGER_PRICE);
+    printf("6. Fries (₹%d)\n", FRIES_PRICE);
+    printf("-------------------------\n");
+}
+
+int getOrderChoice(char *order) {
+    int choice, price = 0;
+    displayCoffeeMenu();
+    displayCafeteriaMenu();
+    printf("Enter your choice: ");
+    scanf("%d", &choice);
+    getchar();
+
+    switch (choice) {
+        case 1:
+            strcpy(order, "Coffee");
+            price = COFFEE_PRICE;
+            break;
+        case 2:
+            strcpy(order, "Latte");
+            price = LATTE_PRICE;
+            break;
+        case 3:
+            strcpy(order, "Cappuccino");
+            price = CAPPUCCINO_PRICE;
+            break;
+        case 4:
+            strcpy(order, "Sandwich");
+            price = SANDWICH_PRICE;
+            break;
+        case 5:
+            strcpy(order, "Burger");
+            price = BURGER_PRICE;
+            break;
+        case 6:
+            strcpy(order, "Fries");
+            price = FRIES_PRICE;
+            break;
+        default:
+            printf("Invalid choice.\n");
+            return 0;
+    }
+    return price;
+}
+
+int handlePayment(int totalPrice) {
+    printf("\nTotal amount: ₹%d\n", totalPrice);
+    printf("Payment Options:\n");
+    printf("1. Cash\n");
+    printf("2. Card\n");
+    printf("3. UPI\n");
+    printf("Choose payment method: ");
+
+    int paymentChoice;
+    scanf("%d", &paymentChoice);
+    getchar();
+
+    switch (paymentChoice) {
+        case 1:
+            printf("Payment successful using Cash.\n");
+            return 1;
+        case 2:
+            printf("Payment successful using Card.\n");
+            return 1;
+        case 3:
+            printf("Payment successful using UPI.\n");
+            return 1;
+        default:
+            printf("Invalid payment method. Payment failed.\n");
+            return 0;
+    }
+}
+
+void onlineOrder(Stack *s) {
+    char name[50], phone[15], address[100];
+    int numOrders;
+    int total = 0;
+    char order[ORDER_SIZE];
+
+    printf("Enter Name: ");
+    fgets(name, sizeof(name), stdin);
+    name[strcspn(name, "\n")] = '\0';
+
+    printf("Enter Phone Number: ");
+    fgets(phone, sizeof(phone), stdin);
+    phone[strcspn(phone, "\n")] = '\0';
+
+    printf("Enter Address: ");
+    fgets(address, sizeof(address), stdin);
+    address[strcspn(address, "\n")] = '\0';
+
+    printf("Enter number of orders: ");
+    scanf("%d", &numOrders);
+    getchar();
+
+    for (int i = 0; i < numOrders; i++) {
+        int price = getOrderChoice(order);
+        if (price > 0) {
+            total += price;
+            push(s, order);
+        }
+    }
+
+    int upiChoice;
+    printf("\nTotal amount: ₹%d\n", total);
+    printf("Online orders support UPI only.\n Proceed with UPI payment? (1 = Yes, 0 = No): ");
+    scanf("%d", &upiChoice);
+    getchar();
+
+    if (upiChoice == 1) {
+        printf("Payment successful using UPI.\n");
+        printf("Order confirmed for %s (Phone: %s)\n", name, phone);
+        printf("Thank you for ordering with us!\n");
+    } else {
+        printf("Payment failed. Could not place order for delivery.\n");
+    }
+}
+
+void offlineOrder(Stack *s) {
+    int choice;
+    printf("\nOffline Mode:\n1. Table Booking\n2. Order Placement\nEnter your choice: ");
+    scanf("%d", &choice);
+    getchar();
+
+    if (choice == 1) {
+        char name[50], phone[15];
+        int tableNumber;
+        char time[20];
+
+        printf("Enter Name: ");
+        fgets(name, sizeof(name), stdin);
+        name[strcspn(name, "\n")] = '\0';
+
+        printf("Enter Phone Number: ");
+        fgets(phone, sizeof(phone), stdin);
+        phone[strcspn(phone, "\n")] = '\0';
+
+        printf("Enter Table Number (1-10): ");
+        scanf("%d", &tableNumber);
+        getchar();
+
+        printf("Enter Booking Time: ");
+        fgets(time, sizeof(time), stdin);
+        time[strcspn(time, "\n")] = '\0';
+
+        printf("Table booked for %s at %s.\n", name, time);
+        handlePayment(100);
+        printf("Thank you for your booking!\n");
+
+    } else if (choice == 2) {
+        int mode;
+        printf("\nSelect Order Type:\n1. Family\n2. Single\nEnter mode: ");
+        scanf("%d", &mode);
+        getchar();
+
+        char order[ORDER_SIZE];
+        int total = 0;
+
+        if (mode == 1) {
+            int numPeople;
+            char tableChoice;
+            printf("Enter number of people in the family: ");
+            scanf("%d", &numPeople);
+            getchar();
+            printf("Do you want to enter a table number? (y/n): ");
+            scanf("%c", &tableChoice);
+            getchar();
+            if (tableChoice == 'y' || tableChoice == 'Y') {
+                int tableNumber;
+                printf("Enter table number: ");
+                scanf("%d", &tableNumber);
+                getchar();
+                printf("Table %d selected.\n", tableNumber);
+            }
+
+            for (int i = 0; i < numPeople; i++) {
+                int more = 1;
+                while (more) {
+                    int price = getOrderChoice(order);
+                    if (price > 0) {
+                        total += price;
+                        push(s, order);
+                    }
+                    printf("Add another item for person %d? (1 = Yes, 0 = No): ", i+1);
+                    scanf("%d", &more);
+                    getchar();
+                }
+            }
+            handlePayment(total);
+            printf("Thank you for your order!\n");
+
+        } else if (mode == 2) {
+            int more = 1;
+            char tableChoice;
+            printf("Do you want to enter a table number? (y/n): ");
+            scanf("%c", &tableChoice);
+            getchar();
+
+            if (tableChoice == 'y' || tableChoice == 'Y') {
+                int tableNumber;
+                printf("Enter table number: ");
+                scanf("%d", &tableNumber);
+                getchar();
+                printf("Table %d selected.\n", tableNumber);
+            }
+
+            while (more) {
+                int price = getOrderChoice(order);
+                if (price > 0) {
+                    total += price;
+                    push(s, order);
+                }
+                printf("Add another item? (1 = Yes, 0 = No): ");
+                scanf("%d", &more);
+                getchar();
+            }
+
+            handlePayment(total);
+            printf("Thank you for your order!\n");
+        } else {
+            printf("Invalid mode.\n");
+        }
+    } else {
+        printf("Invalid option.\n");
+    }
+}
+
+int main() {
+    Stack s;
+    initStack(&s);
+    int choice;
+
+    while (1) {
+        displayMenu();
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        getchar();
+
+        switch (choice) {
+            case 1:
+                onlineOrder(&s);
+                break;
+            case 2:
+                offlineOrder(&s);
+                break;
+            case 3:
+                displayOrders(&s);
+                break;
+            case 4:
+                clearOrders(&s);
+                break;
+            case 5:
+                printf("Exiting... Thank you!\n");
+                return 0;
+            default:
+                printf("Invalid choice.\n");
+        }
+    }
+
+    return 0;
+}
+
+
+
+
